@@ -1,0 +1,17 @@
+#upload_button {
+    border: round white;
+    width: 17;
+    height: 3;
+    background: red;
+    margin-top: 2;
+}
+
+#title {
+    text-align: center;
+    align: center middle;
+    text-style: bold;
+}
+
+Screen {
+    align: center middle;
+}
