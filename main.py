@@ -84,6 +84,8 @@ class ImageTerminalApp(App):
         file_path = filedialog.askopenfilename(filetypes=filetypes)
         self.exit(event.button.id)
 
+file_path = None
+
 if __name__ == "__main__":
     app = ImageTerminalApp()
     app.run()
