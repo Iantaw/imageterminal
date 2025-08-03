@@ -124,9 +124,6 @@ class Scaler(Screen):
 class RemovingBackground(Screen):
     pass
 
-class ConvertingFiletypeLoading(Screen):
-    pass
-
 class ScalingLoading(Screen):
     pass
 
