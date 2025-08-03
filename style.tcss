@@ -8,10 +8,46 @@
 
 #title {
     text-align: center;
-    align: center middle;
     text-style: bold;
+    margin-bottom: 2;
 }
 
 Screen {
     align: center middle;
+}
+
+#main-container {
+    align: center middle;
+    height: 100%;
+    width: 100%;
+}
+
+#selectBt1, #selectBt2, #selectBt3 {
+    border: round white;
+    background: red;
+    margin-top: 1;
+    width: 22;
+    height: 3;
+}
+
+#button-container {
+    align: center middle;
+    height: auto;
+    width: 100%;
+    margin-top: 2;
+}
+
+#PNG, #JPG, #JPEG, #BMP, #WEBP, #AVIF {
+    width: 8;
+    height: 3;
+    border: round white;
+    background: red;
+    margin: 0 1;
+}
+
+#conversionTitle {
+    text-align: center;
+    text-style: bold;
+    margin-bottom: 2;
+    width: 100%;
 }
