@@ -36,16 +36,17 @@ Enhance image resolution with deep learning:
 
 ### From PyPI
 
-pip install imageterminal-iantawileh
-
-text
+```
+pip install imageterminal
+```
 
 ### From Source
 
+```
 git clone https://github.com/yourusername/imageterminal.git
 cd imageterminal
 pip install -e .
-
+```
 
 ## Usage
 
