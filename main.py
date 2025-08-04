@@ -9,6 +9,12 @@ import tkinter as tk
 from textual import work
 import cv2
 import numpy as np
+import os
+import importlib.resources as pkg_resources
+
+def get_model_path(filename: str) -> str:
+    with pkg_resources.path('imageterminal', filename) as p:
+        return str(p)
 
 file_path = None
 img = None
@@ -28,7 +34,7 @@ filetype_map = {
 
 class ToolSelector(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -55,7 +61,7 @@ class ToolSelector(Screen):
     
 class FiletypeConverter(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -127,7 +133,7 @@ class FiletypeConverter(Screen):
 
 class CompleteActionPage(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -200,7 +206,8 @@ class RemovingBackground(Screen):
         
         try:
             from rembg import remove
-        except ImportError:
+        except ImportError as e:
+            print(f"Error removing background: {e}")
             self.app.call_from_thread(self.stop_loading)
             self.app.call_from_thread(self.app.pop_screen)
             return
@@ -230,7 +237,7 @@ class RemovingBackground(Screen):
 
 class Upscaler(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -265,18 +272,18 @@ class Upscaler(Screen):
                 yield Label("This process may take up to 5 minutes", id="scaleDisclaimer")
             with Center():
                 yield Label("You will be asked where to save the file on the next step")
-            
+
     def on_button_pressed(self, event: Button.Pressed) -> None:
         global img, model_path, scale, button_id_scale
         
         if event.button.id == "x2":
-            model_path = "./EDSR_x2.pb"
+            model_path = get_model_path("EDSR_x2.pb")
             scale = 2
         elif event.button.id == "x3":
-            model_path = "./EDSR_x3.pb"
+            model_path = get_model_path("EDSR_x3.pb")
             scale = 3
         elif event.button.id == "x4":
-            model_path = "./EDSR_x4.pb"
+            model_path = get_model_path("EDSR_x2.pb")
             scale = 4        
         
         current_format = getattr(img, 'format', 'PNG') if img else 'PNG'
@@ -317,60 +324,68 @@ class UpscalerLoading(Screen):
         self.loader.display = True
         self.upscaleImage()
 
+    def show_error(self, error_message: str) -> None:
+        self.stop_loading()
+        print(f"[SCALE ERROR]: {error_message}")
+
+
     @work(thread=True)
     def upscaleImage(self) -> None:
         global model_path, scale, output_image_path, input_image_path
         
+        print(f"[DEBUG] Starting upscaleImage")
+        print(f"[DEBUG] model_path = {model_path}")
+        print(f"[DEBUG] scale = {scale}")
+        print(f"[DEBUG] input_image_path = {input_image_path}")
+        print(f"[DEBUG] output_image_path = {output_image_path}")
+
+        if not os.path.exists(model_path):
+            print(f"[ERROR] Model file not found at: {model_path}")
+            self.app.call_from_thread(self.show_error, f"Model not found: {model_path}")
+            return
+
+        if not input_image_path or not model_path or not output_image_path:
+            print("[ERROR] Missing one of the required paths.")
+            self.app.call_from_thread(self.show_error, "Missing image or model path.")
+            return
+
         try:
             if not input_image_path or not model_path or not output_image_path:
                 raise ValueError("Missing required paths")
-            
+
+            # Read the image
             image = cv2.imread(input_image_path)
             if image is None:
                 raise ValueError(f"Could not load image from {input_image_path}")
-            
-            print(f"Original image shape: {image.shape}")
-            print(f"Image dtype: {image.dtype}")
-            
-            if len(image.shape) != 3:
-                raise ValueError(f"Expected 3D image (H,W,C), got {len(image.shape)}D")
-            
-            if image.dtype != np.uint8:
-                image = image.astype(np.uint8)
-            
+
+            # Handle possible formats
             if image.shape[2] == 1:
                 image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
             elif image.shape[2] == 4:
                 image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-            
-            print(f"Processed image shape: {image.shape}")
-            
+
+            # Load and run model
             sr = cv2.dnn_superres.DnnSuperResImpl_create()
-            
-            import os
+
             if not os.path.exists(model_path):
                 raise FileNotFoundError(f"Model file not found: {model_path}")
-            
+
             sr.readModel(model_path)
             sr.setModel("edsr", scale)
-            
-            print("Starting upscaling...")
             upscaled = sr.upsample(image)
-            print(f"Upscaled image shape: {upscaled.shape}")
-            
+
             success = cv2.imwrite(output_image_path, upscaled)
             if not success:
                 raise ValueError(f"Failed to save image to {output_image_path}")
-            
-            print("Upscaling completed successfully!")
-            
+
+            # Success
+            self.app.call_from_thread(self.stop_loading)
+            self.app.call_from_thread(self.app.push_screen, CompleteActionPage())
+
         except Exception as e:
-            print(f"Error during upscaling: {str(e)}")
+            print(f"[Upscaling error]: {e}")
             self.app.call_from_thread(self.show_error, str(e))
-            return
-        
-        self.app.call_from_thread(self.stop_loading)
-        self.app.call_from_thread(self.app.push_screen, CompleteActionPage())
+
 
     def stop_loading(self) -> None:
         self.loader.display = False
