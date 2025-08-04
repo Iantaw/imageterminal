@@ -28,7 +28,7 @@ filetype_map = {
 
 class ToolSelector(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -55,7 +55,7 @@ class ToolSelector(Screen):
     
 class FiletypeConverter(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -119,7 +119,7 @@ class FiletypeConverter(Screen):
         if save_path:
             if file_format:
                 img.save(save_path, format=file_format)
-                app.pop_screen()
+                self.app.pop_screen()
             else:
                 img.save(save_path)
         else:
@@ -127,7 +127,7 @@ class FiletypeConverter(Screen):
 
 class CompleteActionPage(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
@@ -230,7 +230,7 @@ class RemovingBackground(Screen):
 
 class Upscaler(Screen):
     CSS_PATH = "style.tcss"
-    BINDINGS = [("escape", "app.pop_screen", "To Previous Page")]
+    BINDINGS = [("escape", "self.app.pop_screen", "To Previous Page")]
 
     def on_mount(self) -> None:
         self.screen.styles.background = "red"
