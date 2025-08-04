@@ -141,8 +141,7 @@ class CompleteActionPage(Screen):
             yield Button("Go to home page", id="homeButton")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
-        while len(self.app.screen_stack) > 1:
-            self.app.pop_screen()
+        self.app.switch_screen(ToolSelector())
 
 class RemovingBackground(Screen):
     CSS_PATH = "style.tcss"
