@@ -93,12 +93,12 @@ imageterminal
 
 ### Performance Notes
 - **Background removal**: Typically takes 5-15 seconds depending on image size
-- **AI upscaling**: Can take 1-5 minutes depending on scale factor and image size
+- **Upscaling**: Takes around 5-15 seconds depending on scale factor and image size
 - **Format conversion**: Near-instantaneous for most operations
 
 ### System Requirements
-- **RAM**: Minimum 4GB (8GB+ recommended for large images)
-- **Storage**: ~500MB for dependencies and models
+- **RAM**: Minimum 1GB (2GB+ recommended for large images)
+- **Storage**: ~50MB for dependencies and models
 - **CPU**: Multi-core processor recommended for faster processing
 
 ## File Structure
@@ -106,10 +106,6 @@ imageterminal
 imageterminal/
 ├── main.py              # Main application file
 ├── style.tcss           # Textual CSS styling
-├── EDSR_x2.pb          # 2x upscaling model
-├── EDSR_x3.pb          # 3x upscaling model
-├── EDSR_x4.pb          # 4x upscaling model
-├── pyproject.toml      # Project configuration
 ├── requirements.txt    # Python dependencies
 └── README.md          # This file
 ```
