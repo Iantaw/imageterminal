@@ -331,61 +331,26 @@ class UpscalerLoading(Screen):
 
     @work(thread=True)
     def upscaleImage(self) -> None:
-        global model_path, scale, output_image_path, input_image_path
-        
-        print(f"[DEBUG] Starting upscaleImage")
-        print(f"[DEBUG] model_path = {model_path}")
-        print(f"[DEBUG] scale = {scale}")
-        print(f"[DEBUG] input_image_path = {input_image_path}")
-        print(f"[DEBUG] output_image_path = {output_image_path}")
+        global scale, output_image_path, input_image_path
 
-        if not os.path.exists(model_path):
-            print(f"[ERROR] Model file not found at: {model_path}")
-            self.app.call_from_thread(self.show_error, f"Model not found: {model_path}")
-            return
-
-        if not input_image_path or not model_path or not output_image_path:
-            print("[ERROR] Missing one of the required paths.")
-            self.app.call_from_thread(self.show_error, "Missing image or model path.")
+        if not input_image_path or not output_image_path:
+            self.app.call_from_thread(self.show_error, "Missing image or save path.")
             return
 
         try:
-            if not input_image_path or not model_path or not output_image_path:
-                raise ValueError("Missing required paths")
-
-            # Read the image
-            image = cv2.imread(input_image_path)
-            if image is None:
-                raise ValueError(f"Could not load image from {input_image_path}")
-
-            # Handle possible formats
-            if image.shape[2] == 1:
-                image = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
-            elif image.shape[2] == 4:
-                image = cv2.cvtColor(image, cv2.COLOR_BGRA2BGR)
-
-            # Load and run model
-            sr = cv2.dnn_superres.DnnSuperResImpl_create()
-
-            if not os.path.exists(model_path):
-                raise FileNotFoundError(f"Model file not found: {model_path}")
-
-            sr.readModel(model_path)
-            sr.setModel("edsr", scale)
-            upscaled = sr.upsample(image)
-
-            success = cv2.imwrite(output_image_path, upscaled)
-            if not success:
-                raise ValueError(f"Failed to save image to {output_image_path}")
-
-            # Success
+            image = Image.open(input_image_path).convert("RGBA")
+            
+            new_width = int(image.width * scale)
+            new_height = int(image.height * scale)
+            
+            upscaled = image.resize((new_width, new_height), Image.LANCZOS)
+            
+            upscaled.save(output_image_path)
+            
             self.app.call_from_thread(self.stop_loading)
             self.app.call_from_thread(self.app.push_screen, CompleteActionPage())
-
         except Exception as e:
-            print(f"[Upscaling error]: {e}")
             self.app.call_from_thread(self.show_error, str(e))
-
 
     def stop_loading(self) -> None:
         self.loader.display = False

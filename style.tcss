@@ -97,3 +97,7 @@ Screen {
     margin: 0 1;
     margin-top: 1;
 }
+
+#upload_button, #selectBt1, #selectBt2, #selectBt3, #PNG, #JPG, #JPEG, #BMP, #WEBP, #AVIF, #x2, #x3, #x4, #homeButton, #title {
+    color: white;
+}
